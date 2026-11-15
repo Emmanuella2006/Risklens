@@ -1,9 +1,10 @@
 {
   "name": "risklens",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Ranks industrial and construction sites by environmental risk so inspectors know which sites to visit first.",
   "type": "module",
   "scripts": {
+    "start": "npx --yes serve .",
     "test": "node --test",
     "rank": "node scripts/rank-sample.js"
   },

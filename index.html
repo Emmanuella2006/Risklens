@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RiskLens</title>
+  <meta name="description" content="Ranks industrial and construction sites by environmental risk so inspectors know which sites to visit first.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <p class="brand">RiskLens</p>
+      <p class="tagline">Know which sites to inspect first.</p>
+    </div>
+  </header>
+
+  <main class="container layout">
+    <section class="card" aria-labelledby="add-title">
+      <h2 id="add-title">Add a site</h2>
+      <form id="site-form" novalidate>
+        <label>Site name
+          <input name="name" type="text" placeholder="e.g. Hillside Paint Works" required>
+        </label>
+
+        <div class="row">
+          <label>District
+            <select name="district" required>
+              <option value="">Choose…</option>
+            </select>
+          </label>
+          <label>Site type
+            <select name="siteType" required>
+              <option value="">Choose…</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Past violations
+          <input name="pastViolations" type="number" min="0" step="1" value="0" required>
+        </label>
+
+        <label>Distance to nearest water or wetland (metres)
+          <input name="distanceToWaterMetres" type="number" min="0" step="1" placeholder="e.g. 300">
+        </label>
+        <label class="check"><input name="distanceUnknown" type="checkbox"> Not known</label>
+
+        <label>Last inspection date
+          <input name="lastInspectionDate" type="date">
+        </label>
+        <label class="check"><input name="neverInspected" type="checkbox"> Never inspected</label>
+
+        <ul id="form-errors" class="errors" role="alert" hidden></ul>
+
+        <button type="submit" class="primary">Add site and score it</button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="list-title">
+      <div class="list-header">
+        <h2 id="list-title">Inspection priority</h2>
+        <div class="actions">
+          <button type="button" id="load-sample" class="secondary">Load sample sites</button>
+          <button type="button" id="clear-all" class="link-button">Clear all</button>
+        </div>
+      </div>
+
+      <div class="summary">
+        <p><span class="badge badge-high">High</span> <strong id="count-high">0</strong></p>
+        <p><span class="badge badge-medium">Medium</span> <strong id="count-medium">0</strong></p>
+        <p><span class="badge badge-low">Low</span> <strong id="count-low">0</strong></p>
+      </div>
+
+      <p id="empty-state" class="empty">No sites yet. Add one with the form, or load the sample sites to see how RiskLens ranks them.</p>
+
+      <div id="table-wrap" class="table-wrap" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Site</th>
+              <th scope="col">Score</th>
+              <th scope="col">Priority</th>
+              <th scope="col">Points (0–3 each)</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="ranked-body"></tbody>
+        </table>
+      </div>
+
+      <p class="note">Scores run from 0 to 100. High is 67 and above, Medium 34–66, Low 33 and below. Sample sites are made up for testing.</p>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
