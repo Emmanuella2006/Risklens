@@ -1,0 +1,12 @@
+[
+  { "id": "S01", "name": "Hillside Paint Works (sample)", "district": "Gasabo", "siteType": "chemical", "pastViolations": 2, "distanceToWaterMetres": 300, "lastInspectionDate": "2025-05-10" },
+  { "id": "S02", "name": "Riverside Brick Plant (sample)", "district": "Nyarugenge", "siteType": "small_manufacturing", "pastViolations": 1, "distanceToWaterMetres": 80, "lastInspectionDate": "2025-09-01" },
+  { "id": "S03", "name": "Green Valley Apartments (sample)", "district": "Kicukiro", "siteType": "construction", "pastViolations": 0, "distanceToWaterMetres": 1000, "lastInspectionDate": "2026-03-15" },
+  { "id": "S04", "name": "Lakeview Hotel (sample)", "district": "Rubavu", "siteType": "hotel", "pastViolations": 1, "distanceToWaterMetres": 150, "lastInspectionDate": "2025-12-01" },
+  { "id": "S05", "name": "Northern Stone Quarry (sample)", "district": "Musanze", "siteType": "quarry", "pastViolations": 3, "distanceToWaterMetres": 600, "lastInspectionDate": null },
+  { "id": "S06", "name": "City Office Park (sample)", "district": "Gasabo", "siteType": "office", "pastViolations": 0, "distanceToWaterMetres": 2500, "lastInspectionDate": "2026-07-20" },
+  { "id": "S07", "name": "Wetland Edge Coffee Mill (sample)", "district": "Huye", "siteType": "agro_processing", "pastViolations": 2, "distanceToWaterMetres": 40, "lastInspectionDate": "2024-10-05" },
+  { "id": "S08", "name": "Eastern Waste Facility (sample)", "district": "Rwamagana", "siteType": "waste_management", "pastViolations": 1, "distanceToWaterMetres": null, "lastInspectionDate": "2026-01-12" },
+  { "id": "S09", "name": "Market Street Shops (sample)", "district": "Nyarugenge", "siteType": "retail", "pastViolations": 0, "distanceToWaterMetres": 450, "lastInspectionDate": "2025-08-30" },
+  { "id": "S10", "name": "Southern Steel Works (sample)", "district": "Bugesera", "siteType": "large_factory", "pastViolations": 0, "distanceToWaterMetres": 1800, "lastInspectionDate": "2026-05-02" }
+]

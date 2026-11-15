@@ -1,0 +1,14 @@
+{
+  "name": "risklens",
+  "version": "0.2.0",
+  "description": "Ranks industrial and construction sites by environmental risk so inspectors know which sites to visit first.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "rank": "node scripts/rank-sample.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
