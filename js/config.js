@@ -6,5 +6,5 @@
 //
 // Leave both empty to run RiskLens without a database: everything is then
 // saved only in this browser (useful for trying it out offline).
-export const SUPABASE_URL = '';
-export const SUPABASE_ANON_KEY = '';
+export const SUPABASE_URL = 'https://oabcefwfnufemxauzxqu.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_UBH-X6jkxg-6J6fDv61oWw_r1_1IRHW';
