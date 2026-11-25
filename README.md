@@ -13,7 +13,7 @@ The Rwanda Environment Management Authority (REMA) has far more registered indus
 
 ## Demo accounts
 
-The app comes with made-up demo data and these test accounts (they are also shown on the login page):
+The app comes with made-up demo data and these test accounts:
 
 | Role | Email | Password |
 |---|---|---|
