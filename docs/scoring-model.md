@@ -1,4 +1,4 @@
-# RiskLens scoring model (Sprint 2)
+# RiskLens scoring model
 
 RiskLens gives each site a risk score from 0 to 100. The higher the score, the sooner inspectors should visit.
 
@@ -15,7 +15,7 @@ Each factor is scored from 0 to 3 points.
 
 ## From points to a score
 
-1. Each factor's points are multiplied by its weight. All weights start at 1, so every factor counts equally.
+1. Each factor's points are multiplied by its weight. All weights start at 1, so every factor counts equally. An administrator can set each weight from 0 to 3 under **Scoring settings** (SRS FR 5.2); at least one weight must be above 0.
 2. The weighted points are divided by the highest possible total and multiplied by 100.
 
 With equal weights: **score = (total points ÷ 12) × 100**, rounded to a whole number.
@@ -34,7 +34,8 @@ When two sites have the same score, the site closer to water goes first. If they
 
 ## Design decisions
 
-- **Equal weights to start.** There is no evidence yet that one factor matters more than another. The weights can be changed in one place (`DEFAULT_WEIGHTS` in `src/scoring.js`) once testing or feedback shows a better balance.
+- **Equal weights to start.** There is no evidence yet that one factor matters more than another. Administrators can change the weights in the app once testing or feedback shows a better balance; the defaults are `DEFAULT_WEIGHTS` in `src/scoring.js`.
+- **Violations and last inspection come from the inspection history.** A site's past violations are the violations entered when it was registered (from paper records) plus every violation logged in RiskLens. Its last inspection date is the latest of the registered date and the inspections logged in RiskLens. So a new inspection changes the score at once (SRS FR 3.2): a pass resets the time factor, a violation adds to the violations factor.
 - **Missing data counts as high risk.** A site with an unknown distance to water, or one that has never been inspected, gets the maximum points for that factor, so a site is never ranked low just because its information is missing.
 - **Water first in ties.** Pollution near water and wetlands spreads furthest and is the hardest to reverse.
 
@@ -48,4 +49,8 @@ When two sites have the same score, the site closer to water goes first. If they
 
 Ranking: A, then C, then B.
 
-All sample sites in `data/sample-sites.json` are made up for testing.
+## Overdue sites
+
+Separately from the score, a site is flagged **overdue** when it has never been inspected or its last inspection was more than a set number of days ago (365 by default; administrators can set 30 to 1,095 days). This check runs automatically when a user logs in and every hour (SRS FR 7.1).
+
+All demo sites in `src/sample-data.js` are made up for testing.
