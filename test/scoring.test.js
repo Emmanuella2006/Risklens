@@ -84,3 +84,17 @@ test('ranking puts the highest score first and breaks ties by distance to water'
   assert.equal(ranked[0].score, ranked[1].score); // both 50
   assert.equal(ranked[0].rank, 1);
 });
+
+test('weights are checked: 0 to 3 each, and not all zero', async () => {
+  const { validateWeights, DEFAULT_WEIGHTS } = await import('../src/scoring.js');
+  assert.deepEqual(validateWeights(DEFAULT_WEIGHTS), []);
+  assert.equal(validateWeights({ siteType: 4, violations: 1, waterDistance: 1, inspectionAge: 1 }).length, 1);
+  assert.match(validateWeights({ siteType: 0, violations: 0, waterDistance: 0, inspectionAge: 0 })[0], /At least one/);
+});
+
+test('local dates are used, and impossible dates are rejected', async () => {
+  const { localToday, toDay, daysBetween } = await import('../src/scoring.js');
+  assert.equal(localToday(new Date(2026, 0, 5, 23, 30)), '2026-01-05');
+  assert.throws(() => toDay('2026-02-30'));
+  assert.equal(daysBetween('2026-01-01', '2026-01-31'), 30);
+});

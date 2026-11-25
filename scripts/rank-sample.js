@@ -1,11 +1,14 @@
-// Prints the sample sites ranked by risk. Run with: npm run rank
-import { readFile } from 'node:fs/promises';
-import { rankSites } from '../src/scoring.js';
+// Prints the demo sites ranked by risk, the same way the app ranks them.
+// Run with: npm run rank
+import { buildSampleData } from '../src/sample-data.js';
+import { buildRankedSites } from '../src/sites.js';
+import { DEFAULT_WEIGHTS, localToday } from '../src/scoring.js';
 
-const sites = JSON.parse(await readFile(new URL('../data/sample-sites.json', import.meta.url), 'utf8'));
-const ranked = rankSites(sites);
+const today = localToday();
+const { sites, inspections } = buildSampleData(today);
+const ranked = buildRankedSites({ sites, inspections, settings: { weights: DEFAULT_WEIGHTS, overdueThresholdDays: 365 } }, { asOfDate: today });
 
-console.log('RiskLens: sample sites ranked by risk (highest first)\n');
+console.log(`RiskLens: demo sites ranked by risk on ${today} (highest first)\n`);
 console.table(
   ranked.map((s) => ({
     Rank: s.rank,
@@ -13,5 +16,6 @@ console.table(
     District: s.district,
     Score: s.score,
     Priority: s.priority,
+    Overdue: s.overdue ? 'yes' : '',
   })),
 );
