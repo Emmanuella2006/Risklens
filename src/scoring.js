@@ -1,9 +1,13 @@
 /**
- * RiskLens risk-scoring engine (Sprint 2).
+ * RiskLens risk-scoring engine.
  *
  * Gives each site a risk score from 0 to 100 so inspectors know which
- * sites to visit first. Four factors are each scored from 0 to 3 points,
- * combined with weights, and turned into a score out of 100.
+ * sites to visit first (SRS FR 3.1). Four factors are each scored from
+ * 0 to 3 points, combined with weights set by an administrator, and
+ * turned into a score out of 100.
+ *
+ * Everything in this file is plain JavaScript with no browser code,
+ * so it can be tested with Node (npm test).
  */
 
 // Site types grouped by environmental impact. 1 = low, 2 = medium, 3 = high.
@@ -22,7 +26,7 @@ export const SITE_TYPE_POINTS = {
   waste_management: 3,
 };
 
-// How much each factor counts. Equal to start with; change these to test other options.
+// How much each factor counts. Equal to start with; administrators can change them.
 export const DEFAULT_WEIGHTS = {
   siteType: 1,
   violations: 1,
@@ -30,7 +34,13 @@ export const DEFAULT_WEIGHTS = {
   inspectionAge: 1,
 };
 
+export const FACTORS = ['siteType', 'violations', 'waterDistance', 'inspectionAge'];
+
 export const MAX_POINTS_PER_FACTOR = 3;
+
+// Weights can be set from 0 (ignore the factor) to 3 (counts three times as much).
+export const MIN_WEIGHT = 0;
+export const MAX_WEIGHT = 3;
 
 // Priority levels for the final score (0-100).
 export const PRIORITY_LEVELS = [
@@ -62,7 +72,7 @@ export function scoreViolations(pastViolations) {
  */
 export function scoreWaterDistance(distanceMetres) {
   if (distanceMetres === null || distanceMetres === undefined) return 3;
-  if (typeof distanceMetres !== 'number' || distanceMetres < 0) {
+  if (typeof distanceMetres !== 'number' || Number.isNaN(distanceMetres) || distanceMetres < 0) {
     throw new Error(`Distance to water must be 0 or more metres, got: ${distanceMetres}`);
   }
   if (distanceMetres < 100) return 3;
@@ -71,16 +81,42 @@ export function scoreWaterDistance(distanceMetres) {
   return 0;
 }
 
+/** Turns "2026-05-10" or a Date into a Date at midnight UTC, or throws. */
+export function toDay(value) {
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) throw new Error('Invalid date');
+    return new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
+  }
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value ?? ''));
+  if (!match) throw new Error(`Invalid date: ${value}`);
+  const day = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  if (Number.isNaN(day.getTime()) || day.getUTCDate() !== Number(match[3])) {
+    throw new Error(`Invalid date: ${value}`);
+  }
+  return day;
+}
+
+/** Today's date as "YYYY-MM-DD" in the user's own time zone (not UTC). */
+export function localToday(now = new Date()) {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 /** Whole months between two dates (ignores days left over). */
 export function monthsBetween(fromDate, toDate) {
-  const from = new Date(fromDate);
-  const to = new Date(toDate);
-  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
-    throw new Error(`Invalid date: ${fromDate} or ${toDate}`);
-  }
-  let months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
-  if (to.getDate() < from.getDate()) months -= 1;
+  const from = toDay(fromDate);
+  const to = toDay(toDate);
+  let months = (to.getUTCFullYear() - from.getUTCFullYear()) * 12 + (to.getUTCMonth() - from.getUTCMonth());
+  if (to.getUTCDate() < from.getUTCDate()) months -= 1;
   return Math.max(0, months);
+}
+
+/** Whole days between two dates. */
+export function daysBetween(fromDate, toDate) {
+  const ms = toDay(toDate).getTime() - toDay(fromDate).getTime();
+  return Math.max(0, Math.round(ms / 86400000));
 }
 
 /**
@@ -100,6 +136,24 @@ export function getPriority(score) {
   return PRIORITY_LEVELS.find((level) => score >= level.min).label;
 }
 
+/** Checks a set of weights and returns a list of problems (empty if fine). */
+export function validateWeights(weights) {
+  const errors = [];
+  let total = 0;
+  for (const factor of FACTORS) {
+    const value = weights?.[factor];
+    if (typeof value !== 'number' || Number.isNaN(value) || value < MIN_WEIGHT || value > MAX_WEIGHT) {
+      errors.push(`The weight for ${factor} must be a number from ${MIN_WEIGHT} to ${MAX_WEIGHT}.`);
+    } else {
+      total += value;
+    }
+  }
+  if (errors.length === 0 && total === 0) {
+    errors.push('At least one factor must have a weight above 0.');
+  }
+  return errors;
+}
+
 /**
  * Score one site. Returns the points for each factor, the final score
  * out of 100 and the priority level.
@@ -114,7 +168,7 @@ export function calculateRiskScore(site, { weights = DEFAULT_WEIGHTS, asOfDate =
 
   let weighted = 0;
   let maxWeighted = 0;
-  for (const factor of Object.keys(points)) {
+  for (const factor of FACTORS) {
     const weight = weights[factor] ?? 0;
     weighted += points[factor] * weight;
     maxWeighted += MAX_POINTS_PER_FACTOR * weight;
@@ -128,9 +182,9 @@ export function calculateRiskScore(site, { weights = DEFAULT_WEIGHTS, asOfDate =
 }
 
 /**
- * Score and rank a list of sites, highest risk first.
+ * Score and rank a list of sites, highest risk first (SRS FR 4.1).
  * Ties are broken by: closer to water first, then more past violations,
- * then the site that has gone longest without an inspection.
+ * then the site that has gone longest without an inspection, then name.
  */
 export function rankSites(sites, options = {}) {
   const scored = sites.map((site) => ({ ...site, ...calculateRiskScore(site, options) }));
@@ -140,7 +194,8 @@ export function rankSites(sites, options = {}) {
       if (b.score !== a.score) return b.score - a.score;
       if (b.points.waterDistance !== a.points.waterDistance) return b.points.waterDistance - a.points.waterDistance;
       if (b.points.violations !== a.points.violations) return b.points.violations - a.points.violations;
-      return b.points.inspectionAge - a.points.inspectionAge;
+      if (b.points.inspectionAge !== a.points.inspectionAge) return b.points.inspectionAge - a.points.inspectionAge;
+      return String(a.name ?? '').localeCompare(String(b.name ?? ''));
     })
     .map((site, index) => ({ rank: index + 1, ...site }));
 }
